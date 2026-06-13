@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>트럭 이미지 분류기</title>
+</head>
+<body>
+
+<h1>🚚 트럭 이미지 분류기</h1>
+
+<input type="file" id="imageInput" accept="image/*">
+
+<button id="predictBtn">분류하기</button>
+
+<div id="result"></div>
+
+<script>
+const API_URL = "https://dur1-truck-classification.hf.space/predict";
+
+document.getElementById("predictBtn").addEventListener("click", async function() {
+
+    const file = document.getElementById("imageInput").files[0];
+
+    if (!file) {
+        alert("이미지를 선택하세요.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "분류 중...";
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        resultDiv.innerHTML =
+            "<h3>결과</h3>" +
+            "<p>차종: " + data.class_name + "</p>" +
+            "<p>트럭 여부: " + (data.is_truck ? "예" : "아니오") + "</p>" +
+            "<p>신뢰도: " + (data.confidence * 100).toFixed(2) + "%</p>";
+
+    } catch (error) {
+        resultDiv.innerHTML = "오류 발생: " + error.message;
+    }
+});
+</script>
+
+</body>
+</html>
